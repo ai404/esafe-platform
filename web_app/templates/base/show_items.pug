@@ -1,0 +1,50 @@
+- var can_add = current_user.role_id == ADMIN or current_user.role_id == MANAGER and kind == "entity"
+
+extends partials/layout_user
+
+block header_title
+    | All #{title}s
+block content
+    if not items
+        // Content Row
+        .row
+            .jumbotron.mx-auto(style="width:100%")
+                h4.display-5 You dont have any #{kind} yet!
+
+                if can_add
+                    p
+                        | Click on add new #{kind} to get started!
+                    a.btn.bg-navy.btn-md(href=url_for(kind+".adder") role='button') Add new #{kind}
+    else
+        .row
+            each item in items
+                .col-lg-4.mb-4
+                    .card
+                        .card-body
+                            a.text-primary(href=url_for(kind+".panel", id=item.id)) #{item.name}
+                            .text-black-50.small 
+                                i.fas.fa-map-marker-alt
+                                |  #{item.address}
+                            .text-black-50.small &nbsp;
+                        .card-footer
+                            a.btn.btn-white.btn-circle.btn-sm.float-right(href=url_for(kind+".panel", id=item.id))
+                                i.fas.fa-arrow-right
+                            span.text-danger.small
+                                i.fas.fa-video
+                                |  #{item.active_cameras_count}
+                            |  | 
+                            span.text-warning.small
+                                i.fas.fa-exclamation-triangle
+                                |  #{item.alerts_count()}
+            if can_add
+                .col-lg-4.mb-4
+                    a.elevation-1(href=url_for(".adder"), style="width: 100%;color: inherit;text-decoration: inherit;height: 157px;border-radius: 5px;background-color: #e8e9ec;justify-content: center;display: flex;align-items: center;")
+                        i.fas.fa-plus
+
+
+
+    
+block scripts
+    script.
+        // -- Dynamically set sidebar tab
+        $("##{kind}-main").find(":first").addClass("active");

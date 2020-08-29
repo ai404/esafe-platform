@@ -1,0 +1,115 @@
+mixin show_input(field, readonly, class="form-control")
+    !{field(placeholder=field.description if field.description else field.label.text,disabled=readonly,class=class)}
+    if field.errors
+        .text-danger(role="alert")
+            for err in field.errors
+                .small - #{err}
+mixin render_field(field,readonly=False, horizontal_label=True)
+    if field.type == 'CSRFTokenField'
+        !{field}
+        if field.errors
+            .bg-warning You have submitted an invalid CSRF token
+    elif field.type == 'FileField'
+        .form-group.row
+            label.col-sm-3.col-form-label.col-form-label-sm(for=field.label.field_id)=field.label.text
+            .col-sm-9
+                !{field(accept=field.accept)}
+                if field.errors
+                    .bg-danger.text-white(role="alert")
+                        for err in field.errors
+                            p #{err}
+                p.help-block=field.description
+                if field.data
+                    <img src="!{field.data}" width="70%">
+    elif field.type == 'HiddenField'
+        !{field}
+    elif field.type == 'BoundingBoxField' or field.type == 'CameraPicker'
+        - var max_nodes = 1 if field.type == 'CameraPicker' else 100
+        - var target_field = "coordinates" if field.type == 'CameraPicker' else "bounding_box"
+        .form-group.row
+            label.col-sm-3.col-form-label.col-form-label-sm(for=field.label.field_id)=field.label.text
+            .col-sm-9
+                !{field}
+                .row
+                    canvas#canvas_entity(width=600, height=350, style="background-size: 600px 350px;border:1px solid red;")
+                .row
+                    .d-none.d-sm-inline-block
+                        a#clear-entity-btn.btn.btn-sm.m-1.btn-warning(href='#', onclick="resetEntityAll()")
+                            | Clear
+        script.
+            let entity_field = new SpecialField("canvas_entity", init_draw=true, fill_shape_value=true, max_nodes_value=#{max_nodes});
+            entity_field.on_each_node_f = function(){
+                document.getElementById("#{target_field}").value = this.shapes.map((l)=>{ return (l.x/this.canvas.width)+";"+(l.y/this.canvas.height) }).join(" | ");
+            }
+            entity_field.on_init_nodes = function(){
+                var v = document.getElementById("#{target_field}").value;
+                if(typeof v !== 'undefined' && v!="" && v!="None"){
+                    var raw_shapes = v.split("|").map(s=>s.split(";").map(Number.parseFloat));
+                    if (typeof raw_shapes !== 'undefined'){
+                        entity_field.shapes = [];
+                        raw_shapes.forEach((el)=>{
+                            this.shapes.push({x:el[0]*this.canvas.width,y:el[1]*this.canvas.height,r:7,fill:"#0c64e8",isDragging:false});
+                        });
+                    }
+                }
+                entity_field.draw();
+            }
+            entity_field.on_init_nodes();
+            function resetEntityAll(){
+                entity_field.clear(clear_shapes=true)
+            }
+            document.getElementById("clear-entity-btn").addEventListener("click", function(event) {
+                    event.preventDefault();
+            }, false);
+            
+    elif field.type == 'CameraConfigField'
+        .form-group.row
+            label.col-sm-3.col-form-label.col-form-label-sm(for=field.label.field_id)=field.label.text
+            .col-sm-9
+                !{field}
+                .row
+                    canvas#canvas_camera(width=600, height=350, style="background-size: 600px 450px;border:1px solid red;")
+                .row
+                    .d-none.d-sm-inline-block
+                        a#edit-btn.btn.btn-sm.m-1.btn-warning(href='#', onclick="pingSource()")
+                            | Ping
+                        a#clear-btn.btn.btn-sm.m-1.btn-warning(href='#', onclick="resetAll()")
+                            | Clear
+
+        script.
+            
+            let camera_field = new SpecialField("canvas_camera", init_draw=false, fill_shape_value=false, max_nodes_value=4);
+            camera_field.on_max_nodes_f = function(){
+                document.getElementById("#{field.label.field_id}").value = this.shapes.map((l)=>{ return (l.x/this.canvas.width)+";"+(l.y/this.canvas.height) }).join(" | ");
+            }
+            function resetAll(){
+                camera_field.clear(clear_shapes=true)
+            }
+            function pingSource(){
+                var camera_shapes = camera_field.shapes;
+                if(camera_shapes.length == 0)
+                    var v = document.getElementById("#{field.label.field_id}").value;
+                    if(typeof v !== 'undefined' && v!=""){
+                        var raw_shapes = v.split("|").map(s=>s.split(";").map(Number.parseFloat));
+                        if (typeof raw_shapes !== 'undefined'){
+                            camera_field.shapes = [];
+                            raw_shapes.forEach(function(el){
+                                camera_field.shapes.push({x:el[0]*600,y:el[1]*350,r:7,fill:"#0c64e8",isDragging:false});
+                            });
+                        }
+                    }
+                camera_field.draw();
+            }
+            document.getElementById("clear-btn").addEventListener("click", function(event) {
+                    event.preventDefault();
+            }, false);
+    else
+        if horizontal_label
+            .form-group.row
+                label.col-sm-3.col-form-label.col-form-label-sm(for=field.label.field_id)=field.label.text
+                .col-sm-9
+                    +show_input(field, readonly, "" if field.type == "BooleanField" else "form-control")
+        else
+            .form-group
+                label(for=field.label.field_id)=field.label.text
+                +show_input(field, readonly)

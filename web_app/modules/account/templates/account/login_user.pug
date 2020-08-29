@@ -1,0 +1,21 @@
+- import '_forms.pug' as forms
+extends partials/layout_guest
+
+block content
+	p.login-box-msg Sign in to start your session
+	form(method='post')
+		include _messages.pug
+		for field in form
+			!{forms.render_field(field, horizontal_label=False)}
+		.row
+			.col-8
+				.icheck-primary
+					input#remember(type='checkbox', name="remember_me")
+					label(for='remember')
+						| Remember Me
+			.col-4
+				button.btn.btn-primary.btn-block(type='submit') Sign In
+	p.mb-1
+		a(href=url_for(".reset")) I forgot my password
+	p.mb-0
+		a(href=url_for(".register")) Register a new account

@@ -1,0 +1,129 @@
+
+
+extends partials/layout_user
+
+block header_right
+	ol.breadcrumb.bg-transparent.p-0
+		li.breadcrumb-item
+			i.fas.fa-home.text-white-300
+		li.breadcrumb-item
+			a(href=url_for(".user_items"))= item.__class__.__name__
+		li.breadcrumb-item.active(aria-current='page') #{item.name}
+block content
+	.row
+		.col-4.col-s-12
+			// small card
+			.small-box.bg-info
+				.inner
+					h3= item.active_cameras_count
+					p Operating Camera(s)
+				.icon
+					i.fas.fa-video
+				//-a.small-box-footer(href='#')
+					| More info 
+					i.fas.fa-arrow-circle-right
+		.col-4.col-s-12
+			// small card
+			.small-box.bg-danger
+				.inner
+					h3= item.alerts_count("distancing")
+					p S. Distancing Alerts
+				.icon
+					i.fas.fa-exclamation-triangle
+		
+		.col-4.col-s-12
+			// small card
+			.small-box.bg-warning
+				.inner
+					h3= item.alerts_count("mask")
+					p Masks Alerts
+				.icon
+					i.fas.fa-mask
+	.row
+		.col-lg-7
+			.card.mb-4
+				.card-header.py-3
+					h6.m-0.font-weight-bold 
+						i.fas.fa-fw.fa-info-circle
+						| Realtime Monitoring
+				.card-body.p-1
+					if item.plan
+						canvas#canvas_loc(style="border:1px solid red;width: 100%;")
+					else
+						div(style="width: 100%;height: 160px;justify-content: center;display: flex;align-items: center;")
+							center
+								| Image Plan not found
+								br
+								| please add one to activate this card
+							input(type="file")
+		.col-lg-5
+			.card.mb-4
+				.card-header.py-3
+					h6.m-0.font-weight-bold.text-danger
+						i.fas.fa-fw.fa-info-circle
+						| Latest Alerts
+				if alerts
+					.card-body#scroll-alerts(style="max-height: 350px;overflow: scroll;")
+						.small
+							include partials/_alerts
+				else
+					.card-body
+						| No alerts found!
+
+	form(method="POST")#scroll-form
+		input(type="hidden", name="csrf_token", value = csrf_token())
+		input(type="hidden", name="offset", value = offset)
+	
+	// display form errors in a custom modal window //
+	include modals/form-errors
+	include modals/alert
+
+block scripts
+	!{super()}
+	if item.plan
+		script(src=url_for("static", filename='js/location.js'))
+		script.
+			const canvas = document.getElementById('canvas_loc'); 
+			const context = canvas.getContext('2d'); 
+			const img = new Image();
+			img.src = '#{item.plan}';
+			img.onload = () => {
+				var width = canvas.width;
+				var height = img.height * canvas.width / img.width
+				canvas.height = height;
+				document.getElementById("canvas_loc").style.backgroundImage = 'url("#{item.plan}")';
+				document.getElementById("canvas_loc").style.backgroundSize = "contain";
+				draw(!{item.get_boxes()});
+				draw_cameras('!{item.get_cameras_coordiantes()}')
+			};
+	script.
+		// -- Dynamically set sidebar tab
+		$("##{kind}-main").find(":first").addClass("active");
+		var monitor_scroll = true;
+		$("#scroll-form").submit(function(e)
+		{
+			var postData = $(this).serializeArray();
+			$.ajax(
+			{
+				type: "POST",
+				data : postData,
+				success:function(data, textStatus, jqXHR) 
+				{
+					$("#scroll-alerts .small").append(data);
+					$("input[name=offset]").val($(".alert-item:last").data("id"));
+					monitor_scroll = true;
+				},
+				error: function(jqXHR, textStatus, errorThrown) 
+				{
+					//if fails      
+				}
+			});
+			e.preventDefault();
+		});
+		var margin = 0
+		$('#scroll-alerts').on('scroll', function() {
+			if(monitor_scroll && (Math.round($(this).scrollTop() + $(this).innerHeight(), 10) >= Math.round($(this)[0].scrollHeight, 10) - margin)) {
+				monitor_scroll = false;
+				$("#scroll-form").submit();
+			}
+		});

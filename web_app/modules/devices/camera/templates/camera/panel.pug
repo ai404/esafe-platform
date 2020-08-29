@@ -1,0 +1,88 @@
+
+extends partials/layout_user
+
+block content
+    .row
+        // Area Chart
+        .col-xl-12.col-lg-12
+            .card.mb-4
+                // Card Header - Dropdown
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Video Streaming
+                // Card Body
+                .card-body
+                    .row#content-monitoring
+                        .col-sm-8
+                            img#image-monitoring(width="100%")
+                        .col-sm-4
+                            .card.mb-4
+                                // Card Header - Dropdown
+                                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                    h6.m-0.font-weight-bold.text-secondary Alerts Log
+                                // Card Body
+                                .card-body#scroll-alerts(style="max-height: 350px;overflow: scroll;")
+                                    .small#alerts-container
+                                        include partials/_alerts
+                            
+        
+block scripts
+    script.
+        //-- Dynamically set sidebar tab
+        $("#config").find(":first").addClass("active");
+        $("#config").addClass("menu-open");
+        $("##{kind}-config").find(":first").addClass("active");
+
+        var monitor_scroll = true;
+        $("#scroll-form").submit(function(e)
+        {
+            var postData = $(this).serializeArray();
+            $.ajax(
+            {
+                type: "POST",
+                data : postData,
+                success:function(data, textStatus, jqXHR) 
+                {
+                    $("#scroll-alerts .small").append(data);
+                    $("input[name=offset]").val($(".alert-item:last").data("id"));
+                    monitor_scroll = true;
+                },
+                error: function(jqXHR, textStatus, errorThrown) 
+                {
+                    //if fails      
+                }
+            });
+            e.preventDefault();
+        });
+        
+        
+        var margin = 0
+        $('#scroll-alerts').on('scroll', function() {
+            if(monitor_scroll && (Math.round($(this).scrollTop() + $(this).innerHeight(), 10) >= Math.round($(this)[0].scrollHeight, 10) - margin)) {
+                monitor_scroll = false;
+                $("#scroll-form").submit();
+                
+            }
+        })
+
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js")
+    script(src=url_for("static", filename='js/camera.js'))
+    script.
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+        socket.emit('join', {room: "device-#{item.get_name()}"});
+        socket.on('alert', data =>{
+            var el = document.getElementById("alerts-container");
+            el.insertBefore(document.createElement('br'), el.firstChild);
+
+            elChild = document.createElement('span');
+            elChild.setAttribute('data-id', data.id);
+            elChild.setAttribute('class', "alert-item");
+
+            elChild.innerHTML = "&gt; <b>"+data.id+"</b>:&nbsp;" + data.message;
+            el.insertBefore(elChild, el.firstChild);
+        });
+        socket.on('image', data =>{
+            document.getElementById('image-monitoring')
+                .setAttribute(
+                    'src', 'data:image/png;base64,' + arrayBufferToString(data.message)
+                );
+        });

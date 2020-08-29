@@ -1,0 +1,30 @@
+extends base/adder
+if mode == "edit"
+    block scripts
+        !{super()}
+        script.
+            var grab_new_img = true;
+            document.getElementById("edit-btn").addEventListener("click", function(event) {
+                    grab_new_img = true;
+                    event.preventDefault();
+            }, false);
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js")
+        script(src=url_for("static", filename='js/camera.js'))
+        
+        script.
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            socket.emit('join', {room: "device-#{item.get_name()}"});
+            socket.on('image', data =>{
+                if(grab_new_img)
+                document.getElementById("canvas_camera").style.backgroundImage = 'url("data:image/png;base64,' + arrayBufferToString(data.message)+'")';
+                grab_new_img = false;
+            });
+
+            document.getElementById("canvas_entity").style.backgroundImage = "url(#{item.entity.plan})";
+            window.onscroll=function(e){
+                entity_field.reOffset(); 
+                camera_field.reOffset(); 
+            }
+            
+    block header_scripts
+        script(src=url_for("static", filename='js/special_fields.js'))

@@ -1,0 +1,32 @@
+extends partials/layout_user
+
+block header_right
+    if item.streaming_output:
+        a.btn.btn-sm.m-1.btn-info(href=url_for(".streaming", id=item.id))           
+            i.fas.fa-video.fa-sm.text-white-50
+            | &nbsp;Streaming Panel
+    a.btn.btn-sm.m-1.btn-success(href=url_for(".editer", id=item.id))
+        i.fas.fa-edit.fa-sm.text-white-50
+        | &nbsp;Edit
+block content
+    .card.mb-4
+        .card-body
+            h2 #{item.__class__.__name__} Details
+            hr
+            if form
+                table.table.table-borderless
+                    for field in form
+                        if field.label.field_id != "csrf_token"
+                            tr.d-flex
+                                td(class="col-3") #{field.label}
+                                td(class="col-9") : #{field.data}
+            else
+                | form undefined!
+            hr
+
+block scripts
+    script.
+        //-- Dynamically set sidebar tab
+        $("#config").find(':first').addClass("active");
+        $("#config").addClass("menu-open");
+        $("##{kind}-config").find(':first').addClass("active");

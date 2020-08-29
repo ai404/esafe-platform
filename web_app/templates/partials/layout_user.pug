@@ -1,0 +1,162 @@
+- var full_name = current_user.profile.first_name+" "+current_user.profile.last_name
+doctype html
+html
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        title 
+            block title
+                | Dashboard
+            | &nbsp;- E-safe platform
+        // Tell the browser to be responsive to screen width
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        block style
+        // Font Awesome
+        link(rel='stylesheet', href=url_for("static", filename='plugins/fontawesome-free/css/all.min.css'))
+        // Ionicons
+        link(rel='stylesheet', href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')
+        // overlayScrollbars
+        link(rel='stylesheet', href=url_for("static", filename='plugins/overlayScrollbars/css/OverlayScrollbars.min.css'))
+        // Theme style
+        link(rel='stylesheet', href=url_for("static", filename='css/theme.min.css'))
+        // Google Font: Source Sans Pro
+        link(href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700', rel='stylesheet')
+        block header_scripts
+    body.hold-transition.sidebar-mini.layout-fixed.layout-navbar-fixed.accent-navy.text-sm
+        // Site wrapper
+        .wrapper
+            // Navbar
+            nav.main-header.navbar.navbar-expand.navbar-dark.navbar-navy
+                // Left navbar links
+                ul.navbar-nav
+                    li.nav-item
+                        a.nav-link(data-widget="pushmenu" href="#" role="button")
+                            i.fas.fa-bars
+                
+                // Right navbar links
+                ul.navbar-nav.ml-auto
+                    block controls
+                    // User Dropdown Menu
+                    li.nav-item.dropdown
+                        a.nav-link(data-toggle="dropdown" href="#")
+                            i.far.fa-user
+                        .dropdown-menu.dropdown-menu-lg.dropdown-menu-right
+                            span.dropdown-item.dropdown-header
+                                b Role: 
+                                | #{current_user.role.role_name}
+                                b @#{current_user.company.company_name}
+                            .dropdown-divider
+                            a.dropdown-item(href="#")
+                                i.fas.fa-user.mr-2
+                                |  Profile
+                            .dropdown-divider
+                            a.dropdown-item(href="#")
+                                i.fas.fa-cogs.mr-2
+                                |  Settings
+                            .dropdown-divider
+                            a.dropdown-item(href="#")
+                                i.fas.fa-list.mr-2
+                                |  Activity Log
+                            .dropdown-divider
+                            a.dropdown-item.dropdown-footer(href=url_for("account.logout")) Logout
+                    
+            // /.navbar
+            // Main Sidebar Container
+            aside.main-sidebar.sidebar-light-navy.elevation-1
+                // Brand Logo
+                a.brand-link(href=url_for("main.dashboard"))
+                    img.brand-image(src=url_for("static", filename='img/logo.png') alt="E-safe Logo" style="object-fit: cover;width: 31px;height: 31px;object-position: left;")
+                    span.brand-text.font-weight-bold e-safe
+                // Sidebar
+                .sidebar
+                    // Sidebar Menu
+                    nav.mt-2
+                        ul.nav.nav-pills.nav-sidebar.nav-flat.flex-column(data-widget="treeview" role="menu" data-accordion="false")
+                            
+                            li.nav-item#dashboard
+                                a.nav-link(href=url_for("main.dashboard"))
+                                    i.nav-icon.fas.fa-tachometer-alt
+                                    p
+                                        | Dashboard
+                            if current_user.role_id > 1:
+                                li.nav-item#location-main
+                                    a.nav-link(href=url_for("location.user_items"))
+                                        i.nav-icon.fas.fa-folder
+                                        p
+                                            | Locations
+                            li.nav-item#entity-main
+                                a.nav-link(href=url_for("entity.user_items"))
+                                    i.nav-icon.fas.fa-folder
+                                    p
+                                        | Entities
+                            if current_user.role_id != STAFF
+                                li.nav-item.has-treeview#config
+                                    a.nav-link(href="#")
+                                        i.nav-icon.fas.fa-cog
+                                        p
+                                            | Configuration
+                                            i.fas.fa-angle-left.right
+                                    ul.nav.nav-treeview
+                                        if current_user.role_id == ADMIN
+                                            li.nav-item#location-config
+                                                a.nav-link(href=url_for("location.lister"))
+                                                    i.fas.fa-compass.nav-icon
+                                                    p Manage Locations
+                                        li.nav-item#entity-config
+                                            a.nav-link(href=url_for("entity.lister"))
+                                                i.fas.fa-puzzle-piece.nav-icon
+                                                p Manage Entities
+                                        li.nav-item#staff-config
+                                            a.nav-link(href=url_for("staff.lister"))
+                                                i.fas.fa-users.nav-icon
+                                                p Manage Staff
+                                        li.nav-item#camera-config
+                                            a.nav-link(href=url_for("camera.lister"))
+                                                i.fas.fa-video.nav-icon
+                                                p Manage Cameras
+                            li.nav-header Extras
+                            li.nav-item
+                                a.nav-link(href="#")
+                                    i.nav-icon.fas.fa-life-ring
+                                    p Support
+                            li.nav-item
+                                a.nav-link(href="#")
+                                    i.nav-icon.fas.fa-info-circle
+                                    p About
+                            
+            // Content Wrapper. Contains page content
+            .content-wrapper
+                section.content-header
+                    .container-fluid
+                        block header
+                            .row.mb-2
+                                .col-sm-6
+                                    h1 
+                                        block header_title
+                                .col-sm-6
+                                    .float-sm-right
+                                        block header_right
+                section.content
+                    .container-fluid
+                        block content
+
+            footer.main-footer
+                .float-right.d-none.d-sm-block
+                    b Version
+                    |  1.0.0
+                strong
+                    | Copyright © 2020 
+                    a(href="#") e-safe
+                    | .
+                |  All rights
+                |     reserved.
+        
+        // jQuery
+        script(src=url_for("static", filename="plugins/jquery/jquery.min.js"))
+        // Bootstrap 4
+        script(src=url_for("static", filename="plugins/bootstrap/js/bootstrap.bundle.min.js"))
+        // overlayScrollbars
+        script(src=url_for("static", filename="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"))
+        // Theme
+        script(src=url_for("static", filename="js/theme.min.js"))
+        block scripts

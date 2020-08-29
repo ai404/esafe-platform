@@ -1,0 +1,6 @@
+for alert in alerts
+    if alert.alert_type == "distancing"
+        span.alert-item(data-id=alert.id) > <b>#{alert.id}:</b> Social distancing (#{alert.entity.location.name} / #{alert.entity.name}): #{alert.created_on.strftime("%d-%b %H:%M")}
+    else
+        span.alert-item(data-id=alert.id) > <b>#{alert.id}:</b> Mask (#{alert.entity.location.name} / #{alert.entity.name}): #{alert.created_on.strftime("%d-%b %H:%M")}
+    br

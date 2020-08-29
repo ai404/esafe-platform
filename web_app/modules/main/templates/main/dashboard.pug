@@ -1,0 +1,54 @@
+
+extends partials/layout_user
+block title
+    | Dashboard
+block content
+
+    .row
+        .col-xl-12.col-lg-12
+            // Default box
+            .card
+                .card-header
+                    h3.card-title Alerts Hourly Statistics
+                    .card-tools
+                        button.btn.btn-tool(type="button" data-card-widget="collapse" data-toggle="tooltip" title="Collapse")
+                            i.fas.fa-minus
+                .card-body
+                    canvas#myLineChart1(style="min-height: 210px; height: 210px; max-height: 210px; max-width: 100%;")
+        .col-xl-8.col-lg-7
+            .card
+                .card-header
+                    h3.card-title Alerts History
+                    .card-tools
+                        button.btn.btn-tool(type="button" data-card-widget="collapse" data-toggle="tooltip" title="Collapse")
+                            i.fas.fa-minus
+                .card-body
+                    canvas#myAreaChart(style="min-height: 210px; height: 210px; max-height: 210px; max-width: 100%;")
+        .col-xl-4.col-lg-5
+            .card
+                .card-header
+                    h3.card-title Alerts Distribution
+                    .card-tools
+                        button.btn.btn-tool(type="button" data-card-widget="collapse" data-toggle="tooltip" title="Collapse")
+                            i.fas.fa-minus
+                .card-body
+                    canvas#myPieChart(style="min-height: 210px; height: 210px; max-height: 210px; max-width: 100%;")
+block controls
+    form.form-inline.mr-3
+        .input-group.input-group-sm
+            select.form-control.form-control-navbar#insight-select(name='insight-select', placehoder="", style="color:rgba(255,255,255,.75)")
+                option(value="all") Global Statistics
+                for location in current_user.locations
+                    option(value = "loc:#{location.id}") Stats for #{location.name}
+                    for entity in location.entities
+                        option(value = "entity:#{entity.id}") Stats for #{location.name} / #{entity.name}
+block scripts
+    // Page level plugins
+    script(src=url_for("static",filename='plugins/chart.js/Chart.min.js'))
+    script(src=url_for("static",filename='plugins/chart.js/chartjs-plugin-colorschemes.min.js'))
+    // Page level custom scripts
+    script(src=url_for("static",filename='js/charts.js'))
+    script(src=url_for("static",filename='js/dashboard.js'))
+    script.
+        // -- Dynamically set sidebar tab
+        $("#dashboard").find(":first").addClass("active");

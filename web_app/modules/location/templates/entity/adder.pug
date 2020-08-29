@@ -1,0 +1,15 @@
+extends base/adder
+
+
+
+block header_scripts
+    if mode == "edit"
+        script(src=url_for("static", filename='js/special_fields.js'))
+block scripts
+    !{super()}
+    if mode == "edit"
+        script.
+            document.getElementById("canvas_entity").style.backgroundImage = "url(#{item.plan})";
+            window.onscroll=function(e){
+                entity_field.reOffset(); 
+            }

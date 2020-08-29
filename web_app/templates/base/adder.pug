@@ -1,0 +1,29 @@
+- import '_forms.pug' as forms
+extends partials/layout_user
+mixin form_type
+    if mode == "edit"
+        | Edit
+    else
+        | Add
+block content
+    .card.mb-4 
+        .card-body
+            h2 #{form_type()} #{title} Form
+            h6#sub Please fill in the form.
+            hr
+            form(method='post', enctype="multipart/form-data")#account-form
+                for field in form
+                    !{forms.render_field(field)}
+                hr
+                .form-buttons
+                    button(type='submit').btn.bg-navy.float-right
+                        if kind == "staff"
+                            | Proceed
+                        else
+                            | #{form_type()}
+block scripts
+    script.
+        //-- Dynamically set sidebar tab
+        $("#config").find(':first').addClass("active");
+        $("#config").addClass("menu-open");
+        $("##{kind}-config").find(':first').addClass("active");

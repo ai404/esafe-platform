@@ -1,0 +1,13 @@
+- var msg_errors = get_flashed_messages(category_filter=["error"])
+- var msg_infos = get_flashed_messages(category_filter=["info"])
+
+mixin show_messages(msg)
+    each message in msg
+        .small - #{message}
+if msg_errors
+    .alert.alert-danger
+        +show_messages(msg_errors)
+if msg_infos
+    .alert.alert-success
+        +show_messages(msg_infos)
+

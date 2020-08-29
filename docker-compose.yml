@@ -1,0 +1,108 @@
+version: '3'
+services:
+  webapp-esafe:
+    build:
+      context: ./
+      dockerfile: ./web_app/Dockerfile
+    container_name: webapp-esafe
+    image: ai404/webapp-esafe
+    restart: unless-stopped
+    env_file:
+      - mail.env
+    environment:
+      APP_ENV: ${APP_ENV}
+      SECRET_KEY: ${SECRET_KEY}
+      SECURITY_PASSWORD_SALT: ${SECURITY_PASSWORD_SALT}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@esafe-postgres:5431/${POSTGRES_DB}
+      REQUIRE_EMAIL_CONFIRMATION: ${REQUIRE_EMAIL_CONFIRMATION}
+      REDIS_SERVER: ${REDIS_SERVER}
+    depends_on:
+      - esafe-postgres
+      - esafe-redis
+    networks:
+      - frontend
+      - backend
+  esafe-postgres:
+    image: postgres:latest
+    container_name: esafe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    expose:
+      - "5431"
+    ports:
+      - "5431:5431"
+    command: -p 5431
+    networks:
+      - backend
+  inferencer-esafe:
+    build:
+      context: ./
+      dockerfile: ./service/Dockerfile
+    container_name: inferencer-esafe
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@esafe-postgres:5431/${POSTGRES_DB}
+      LOGGING_LEVEL: ${INFERENCER_LOGGING_LEVEL}
+      USE_GRPC: ${USE_GRPC}
+      REDIS_SERVER: ${REDIS_SERVER}
+      TF_SERVE_SERVER: ${TF_SERVE_SERVER}
+    ports:
+      - 2020:2020/udp
+    networks:
+      - backend
+    depends_on:
+      - tf-serving-esafe
+      - esafe-postgres
+      - esafe-redis
+  esafe-redis:
+    image: "redis:alpine"
+    command: redis-server
+    container_name: esafe-redis
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - backend
+  tf-serving-esafe:
+    build:
+      context: tf_serving
+      dockerfile: Dockerfile
+    container_name: tf-serving-esafe
+    image: ai404/tf-serving-esafe
+    restart: unless-stopped
+    expose:
+      - "8500"
+      - "8501"
+    ports:
+      - "8500:8500"
+      - "8501:8501"
+    networks:
+      - backend
+  webserver-esafe:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: ai404/webserver-esafe
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - webapp-esafe
+    networks:
+      - frontend
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

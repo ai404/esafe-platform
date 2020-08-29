@@ -1,0 +1,20 @@
+- import '_forms.pug' as forms
+
+extends partials/layout_guest
+
+block content
+    p.login-box-msg Register a new account
+    form(method='post')
+        include _messages.pug
+        for field in form
+            !{forms.render_field(field, horizontal_label=False)}
+        .row
+            .col-8
+                .icheck-primary
+                    input#agreeTerms(type='checkbox', required, name='terms', value='agree')
+                    label(for='agreeTerms')
+                        | I agree to the 
+                        a(href='#') terms
+            .col-4
+                button.btn.btn-primary.btn-block(type='submit') Register
+    a.text-center(href=url_for(".login")) I already have an account

@@ -1,0 +1,16 @@
+doctype html
+html
+	head 
+		title E-safe platform
+		link(rel='stylesheet', href=url_for("static",filename="css/theme.min.css"))
+		link(rel='stylesheet', href=url_for("static", filename='plugins/fontawesome-free/css/all.min.css'))
+	body.login-page.text-sm(style='min-height: 512.391px;')
+		.login-box
+			.pb-3.pl-2
+				img(src=url_for("static",filename="img/logo.png"), height="40px")
+			.card	
+				.card-body.login-card-body
+					block content
+		script(src=url_for("static", filename="plugins/jquery/jquery.min.js"))
+		script(src=url_for("static", filename="plugins/bootstrap/js/bootstrap.bundle.min.js"))
+		block scripts

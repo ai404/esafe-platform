@@ -1,0 +1,16 @@
+if current_user.is_authenticated
+    extends partials/layout_user
+else
+    extends partials/layout_guest
+
+block content
+    .error-page.d-flex.align-items-center
+        h2.headline.text-warning  404
+        .error-content
+            h3
+                i.fas.fa-exclamation-triangle.text-warning
+                |  Oops! Page not found.
+            p
+                | We could not find the page you were looking for.
+                | Meanwhile, you may 
+                a(href='/') return to home page.
