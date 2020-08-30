@@ -1,4 +1,4 @@
-FROM tensorflow/serving
+FROM tensorflow/serving:latest-gpu
 
 RUN apt-get clean
 

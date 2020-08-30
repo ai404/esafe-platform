@@ -42,6 +42,7 @@ services:
       context: ./
       dockerfile: ./service/Dockerfile
     container_name: inferencer-esafe
+    image: ai404/inferencer-esafe
     restart: unless-stopped
     environment:
       APP_ENV: ${APP_ENV}
@@ -55,7 +56,7 @@ services:
     networks:
       - backend
     depends_on:
-      - tf-serving-esafe
+      #- tf-serving-esafe
       - esafe-postgres
       - esafe-redis
   esafe-redis:
@@ -70,21 +71,21 @@ services:
       - REDIS_REPLICATION_MODE=master
     networks:
       - backend
-  tf-serving-esafe:
-    build:
-      context: tf_serving
-      dockerfile: Dockerfile
-    container_name: tf-serving-esafe
-    image: ai404/tf-serving-esafe
-    restart: unless-stopped
-    expose:
-      - "8500"
-      - "8501"
-    ports:
-      - "8500:8500"
-      - "8501:8501"
-    networks:
-      - backend
+  #tf-serving-esafe:
+  #  build:
+  #    context: tf_serving
+  #    dockerfile: Dockerfile
+  #  container_name: tf-serving-esafe
+  #  image: ai404/tf-serving-esafe
+  #  restart: unless-stopped
+  #  expose:
+  #    - "8500"
+  #    - "8501"
+  #  ports:
+  #    - "8500:8500"
+  #    - "8501:8501"
+  #  networks:
+  #    - backend
   webserver-esafe:
     build:
       context: nginx
@@ -105,4 +106,5 @@ networks:
   frontend:
     driver: bridge
   backend:
-    driver: bridge
+    external:
+      name: backend

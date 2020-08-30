@@ -1,6 +1,9 @@
 import requests
 import imageio
 
+import sys
+sys.path.append("./")
+
 from config import Config
 
 SERVER_URL = f'http://{Config.TF_SERVE_SERVER}:8501/v1/models/ssd_mobilenet_v1_coco:predict'

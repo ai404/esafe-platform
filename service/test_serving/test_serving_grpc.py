@@ -5,7 +5,8 @@ import numpy as np
 import imageio
 
 import sys
-sys.path.append("../protos")
+sys.path.append("service/protos")
+sys.path.append("./")
 
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
