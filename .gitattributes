@@ -1,0 +1,4 @@
+web_app/static/plugins/* linguist-vendored
+web_app/static/js/theme.min.js linguist-vendored
+web_app/static/css/theme.min.css linguist-vendored
+*.pug linguist-language=HTML
